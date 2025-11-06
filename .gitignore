@@ -1,0 +1,33 @@
+# Exclude the circom source code (since it's a separate repo)
+circom/
+
+# Node modules
+node_modules/
+
+# Generated files that can be recreated
+*.r1cs
+*.sym
+*.wtns
+password_js/
+password_0000.zkey
+
+# Keep only the final files we want to share
+# password_final.zkey - keep this
+# verification_key.json - keep this
+# proof.json - keep this
+# public.json - keep this
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Powers of tau files (large, can be downloaded)
+*.ptau

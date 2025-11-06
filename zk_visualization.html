@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zero-Knowledge Proof Visualization</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-right: 280px; /* Make room for floating controls */
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .floating-controls {
+        position: fixed;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        width: 240px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        z-index: 1000;
+        border: 1px solid #dee2e6;
+      }
+
+      .floating-controls h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        font-size: 1.1rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .step-container {
+        padding: 30px;
+      }
+
+      .step {
+        margin-bottom: 40px;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 5px solid #3498db;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        opacity: 0.5;
+        scroll-margin-top: 20px; /* Add space when scrolling to element */
+      }
+
+      .step.active {
+        opacity: 1;
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        border-left-width: 8px; /* Thicker border for active step */
+        background: #f0f8ff; /* Slightly different background */
+      }
+
+      .step.completed {
+        opacity: 1;
+        border-left-color: #27ae60;
+        background: #e8f5e8;
+      }
+
+      .step-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #3498db;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+      }
+
+      .step.completed .step-number {
+        background: #27ae60;
+      }
+
+      .step-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .step-content {
+        margin-left: 55px;
+      }
+
+      .visual-box {
+        background: white;
+        border: 2px dashed #bdc3c7;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .visual-box.filled {
+        border: 2px solid #27ae60;
+        background: #e8f5e8;
+      }
+
+      .btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        margin: 5px 0;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: block;
+      }
+
+      .btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+      }
+
+      .btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .nav-buttons .btn {
+        width: 50%;
+        margin: 0;
+      }
+
+      .data-display {
+        font-family: "Courier New", monospace;
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 10px 0;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+
+      .privacy-demo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .prover-side {
+        background: #e3f2fd;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #2196f3;
+      }
+
+      .verifier-side {
+        background: #f3e5f5;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #9c27b0;
+      }
+
+      .hidden {
+        background: #ffebee;
+        color: #c62828;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+
+      .visible {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+
+      .arrow {
+        font-size: 2rem;
+        color: #3498db;
+        margin: 20px 0;
+      }
+
+      /* Responsive design for smaller screens */
+      @media (max-width: 1440px) {
+        .container {
+          margin-right: 20px;
+        }
+
+        .floating-controls {
+          position: relative;
+          top: auto;
+          right: auto;
+          transform: none;
+          width: 100%;
+          margin-top: 20px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          margin: 0 10px;
+        }
+
+        body {
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔐 Zero-Knowledge Proof Visualization</h1>
+        <p>
+          Understanding how your password ZK circuit proves knowledge without
+          revealing secrets
+        </p>
+      </div>
+
+      <div class="step-container">
+        <div class="step" id="step1">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Circuit Design & Compilation</div>
+          </div>
+          <div class="step-content">
+            <p>
+              Your <code>password.circom</code> circuit defines the
+              computational constraints.
+            </p>
+            <div class="visual-box" id="circuit-box">
+              <div>📝 Circuit: password → Poseidon(password) === hash</div>
+            </div>
+            <div class="data-display">
+              template PasswordProof() { signal input password; // Private
+              signal input hash; // Public component hasher = Poseidon(1);
+              hasher.inputs[0] <== password; hasher.out === hash; }
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="step2">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Input Preparation</div>
+          </div>
+          <div class="step-content">
+            <p>Prepare the secret password and calculate its Poseidon hash.</p>
+            <div class="visual-box" id="input-box">
+              <div>🔑 Password: "123456" → Hash: 3607056778...</div>
+            </div>
+            <div class="privacy-demo">
+              <div class="prover-side">
+                <h4>🙋‍♂️ Prover Knows:</h4>
+                <div class="visible">Password: "123456"</div>
+                <div class="visible">Hash: 3607056778...</div>
+              </div>
+              <div class="verifier-side">
+                <h4>👤 Verifier Knows:</h4>
+                <div class="hidden">Password: HIDDEN</div>
+                <div class="visible">Hash: 3607056778...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="step3">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">Witness Generation</div>
+          </div>
+          <div class="step-content">
+            <p>
+              Compute all intermediate values that satisfy the circuit
+              constraints.
+            </p>
+            <div class="visual-box" id="witness-box">
+              <div>⚙️ Computing witness... All 417 wires calculated!</div>
+            </div>
+            <div class="arrow">⬇️</div>
+            <p>
+              <strong>Witness contains:</strong> All internal signal values
+              needed to prove the circuit is satisfied
+            </p>
+          </div>
+        </div>
+
+        <div class="step" id="step4">
+          <div class="step-header">
+            <div class="step-number">4</div>
+            <div class="step-title">Trusted Setup (Keys Generation)</div>
+          </div>
+          <div class="step-content">
+            <p>
+              Generate proving and verification keys using the Powers of Tau
+              ceremony.
+            </p>
+            <div class="visual-box" id="setup-box">
+              <div>🔐 Proving Key + 🗝️ Verification Key Generated</div>
+            </div>
+            <div class="data-display">
+              Circuit Hash: aa33e85e f416a462... Contribution Hash: f98774b1
+              690dc895...
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="step5">
+          <div class="step-header">
+            <div class="step-number">5</div>
+            <div class="step-title">Proof Generation</div>
+          </div>
+          <div class="step-content">
+            <p>
+              Create a cryptographic proof using the witness and proving key.
+            </p>
+            <div class="visual-box" id="proof-box">
+              <div>🎫 ZK Proof Generated (π_a, π_b, π_c)</div>
+            </div>
+            <div class="privacy-demo">
+              <div class="prover-side">
+                <h4>🙋‍♂️ Prover Sends:</h4>
+                <div class="visible">Proof: π_a, π_b, π_c</div>
+                <div class="visible">Public Input: hash</div>
+                <div class="hidden">Private: password (NOT sent)</div>
+              </div>
+              <div class="verifier-side">
+                <h4>👤 Verifier Receives:</h4>
+                <div class="visible">Proof: π_a, π_b, π_c</div>
+                <div class="visible">Public Input: hash</div>
+                <div class="hidden">Password: STILL HIDDEN</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="step6">
+          <div class="step-header">
+            <div class="step-number">6</div>
+            <div class="step-title">Proof Verification</div>
+          </div>
+          <div class="step-content">
+            <p>Verify the proof without learning the secret password.</p>
+            <div class="visual-box" id="verify-box">
+              <div>✅ Verification: OK! Prover knows the password</div>
+            </div>
+            <div class="data-display" id="real-proof">
+              Click "Show Real Data" to see your actual proof values!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Controls Card -->
+    <div class="floating-controls">
+      <h3>🎛️ Controls</h3>
+
+      <div class="nav-buttons">
+        <button class="btn" onclick="previousStep()" id="prevBtn" disabled>
+          ← Prev
+        </button>
+        <button class="btn" onclick="nextStep()" id="nextBtn">Next →</button>
+      </div>
+
+      <button class="btn" onclick="showRealData()" id="dataBtn">
+        Show Real Data
+      </button>
+
+      <button class="btn" onclick="resetDemo()" id="resetBtn">
+        🔄 Reset Demo
+      </button>
+    </div>
+
+    <script>
+      let currentStep = 1;
+      const totalSteps = 6;
+      let dataVisible = false;
+
+      // Real data from your actual proof
+      const realData = {
+        publicInput:
+          "3607056778794995795434385085847334626017449707154072104308864676240828390282",
+        proof: {
+          pi_a: [
+            "12246699224146548627624829209600247945750932139831111645328730466600448020655",
+            "7092076363605337771732379755396515266262121109253632505918013175086193007416",
+            "1",
+          ],
+          pi_b: [
+            [
+              "12688793338312962033041396111903075687159456896404431660203437358697869656086",
+              "3736381997616963958526035063790946218087651755117739473637210399883566022986",
+            ],
+            [
+              "13017499828776106857417975762902544155806477130587681284411023337035741513386",
+              "2567661726386688530449431032730908097668871569859777304991905147827476996387",
+            ],
+            ["1", "0"],
+          ],
+          pi_c: [
+            "979833473831804295709808911181475642130290987577771095588948640681540378288",
+            "729158646760088476307727799993169940563438518246923784880367707695952597064",
+            "1",
+          ],
+        },
+      };
+
+      function updateStepVisuals() {
+        for (let i = 1; i <= totalSteps; i++) {
+          const step = document.getElementById(`step${i}`);
+          if (i < currentStep) {
+            step.className = "step completed";
+          } else if (i === currentStep) {
+            step.className = "step active";
+          } else {
+            step.className = "step";
+          }
+        }
+
+        // Update visual boxes
+        for (let i = 1; i <= currentStep; i++) {
+          const boxes = document.querySelectorAll(`#step${i} .visual-box`);
+          boxes.forEach((box) => box.classList.add("filled"));
+        }
+
+        // Update button states
+        document.getElementById("prevBtn").disabled = currentStep === 1;
+        document.getElementById("nextBtn").disabled =
+          currentStep === totalSteps;
+
+        // Smooth scroll to current step
+        scrollToCurrentStep();
+      }
+
+      function scrollToCurrentStep() {
+        const currentStepElement = document.getElementById(
+          `step${currentStep}`
+        );
+        if (currentStepElement) {
+          currentStepElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+
+          // Add a subtle highlight effect
+          currentStepElement.style.transform = "scale(1.02)";
+          setTimeout(() => {
+            currentStepElement.style.transform = "";
+          }, 300);
+        }
+      }
+
+      function nextStep() {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateStepVisuals();
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 1) {
+          currentStep--;
+          updateStepVisuals();
+        }
+      }
+
+      function showRealData() {
+        const proofDisplay = document.getElementById("real-proof");
+        const dataBtn = document.getElementById("dataBtn");
+
+        if (!dataVisible) {
+          // Show the data
+          proofDisplay.innerHTML = `
+<strong>Your Actual Proof Data:</strong>
+<br><br>
+<strong>Public Input (Hash):</strong>
+${realData.publicInput}
+<br><br>
+<strong>Proof π_a:</strong>
+[${realData.proof.pi_a[0]},
+ ${realData.proof.pi_a[1]},
+ ${realData.proof.pi_a[2]}]
+<br><br>
+<strong>Proof π_b:</strong>
+[[${realData.proof.pi_b[0][0]},
+  ${realData.proof.pi_b[0][1]}],
+ [${realData.proof.pi_b[1][0]},
+  ${realData.proof.pi_b[1][1]}],
+ [${realData.proof.pi_b[2][0]}, ${realData.proof.pi_b[2][1]}]]
+<br><br>
+<strong>Proof π_c:</strong>
+[${realData.proof.pi_c[0]},
+ ${realData.proof.pi_c[1]},
+ ${realData.proof.pi_c[2]}]
+            `;
+          dataBtn.textContent = "Hide Real Data";
+          dataVisible = true;
+        } else {
+          // Hide the data
+          proofDisplay.innerHTML =
+            'Click "Show Real Data" to see your actual proof values!';
+          dataBtn.textContent = "Show Real Data";
+          dataVisible = false;
+        }
+      }
+
+      function resetDemo() {
+        currentStep = 1;
+        updateStepVisuals();
+        document.getElementById("real-proof").innerHTML =
+          'Click "Show Real Data" to see your actual proof values!';
+        document.getElementById("dataBtn").textContent = "Show Real Data";
+        dataVisible = false;
+      }
+
+      // Initialize
+      updateStepVisuals();
+
+      // Add keyboard navigation
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextStep();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          previousStep();
+        }
+      });
+    </script>
+  </body>
+</html>
