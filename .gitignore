@@ -11,11 +11,8 @@ node_modules/
 password_js/
 password_0000.zkey
 
-# Keep only the final files we want to share
-# password_final.zkey - keep this
-# verification_key.json - keep this
-# proof.json - keep this
-# public.json - keep this
+# Powers of tau files (large, can be downloaded from Hermez ceremony)
+*.ptau
 
 # OS generated files
 .DS_Store
@@ -28,6 +25,4 @@ Thumbs.db
 
 # VS Code
 .vscode/
-
-# Powers of tau files (large, can be downloaded)
-*.ptau
+*.code-workspace
