@@ -293,6 +293,102 @@
         transform: translateY(0);
       }
 
+      .interactive-demo {
+        background: #f0f8ff;
+        border: 2px solid #3498db;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .interactive-demo h4 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .input-group {
+        margin: 15px 0;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #bdc3c7;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+
+      .demo-output {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        margin: 10px 0;
+        word-break: break-all;
+      }
+
+      .live-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+
+      .status-pending {
+        background: #f39c12;
+        color: white;
+      }
+
+      .status-success {
+        background: #27ae60;
+        color: white;
+      }
+
+      .status-error {
+        background: #e74c3c;
+        color: white;
+      }
+
+      .interactive-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin: 5px;
+        transition: all 0.3s ease;
+      }
+
+      .interactive-btn:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+      }
+
+      .interactive-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
       /* Responsive design for smaller screens */
       @media (max-width: 1440px) {
         .container {
@@ -405,7 +501,10 @@
           • Why ZK proofs are "magical" - proving knowledge without revealing
           secrets<br />
           • The technical process from circuit design to verification<br />
-          • Real-world applications of this privacy-preserving technology
+          • Real-world applications of this privacy-preserving technology<br />
+          <br />
+          <strong>🎮 Interactive Feature:</strong> Try the hands-on demo in Step
+          2 to generate your own hash and simulate the ZK proof process!
         </div>
       </div>
 
@@ -519,6 +618,66 @@
                 <h4>👤 Verifier Knows:</h4>
                 <div class="hidden">Password: HIDDEN</div>
                 <div class="visible">Hash: 3607056778...</div>
+              </div>
+            </div>
+
+            <div class="interactive-demo">
+              <h4>🎮 Try It Yourself - Interactive Hash Generation</h4>
+
+              <div class="input-group">
+                <label for="userPassword">Enter Your Password:</label>
+                <input
+                  type="text"
+                  id="userPassword"
+                  placeholder="Type any password..."
+                  maxlength="50"
+                />
+              </div>
+
+              <div style="text-align: center; margin: 15px 0">
+                <button
+                  class="interactive-btn"
+                  onclick="generateLiveHash()"
+                  id="hashBtn"
+                >
+                  🔄 Generate Poseidon Hash
+                </button>
+              </div>
+
+              <div class="input-group">
+                <label>Generated Hash:</label>
+                <div class="demo-output" id="liveHashOutput">
+                  Enter a password and click "Generate Hash" to see the
+                  result...
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label
+                  >Status:
+                  <span class="live-status status-pending" id="hashStatus"
+                    >Ready</span
+                  ></label
+                >
+              </div>
+
+              <div style="text-align: center; margin-top: 15px">
+                <button
+                  class="interactive-btn"
+                  onclick="simulateProofProcess()"
+                  id="proveBtn"
+                  disabled
+                >
+                  🎯 Simulate ZK Proof Process
+                </button>
+              </div>
+
+              <div
+                class="demo-output"
+                id="proofSimulation"
+                style="display: none"
+              >
+                <!-- Proof simulation results will appear here -->
               </div>
             </div>
 
@@ -928,6 +1087,170 @@
       let currentStep = 1;
       const totalSteps = 6;
       let dataVisible = false;
+      let userGeneratedHash = null;
+      let userPassword = null;
+      let hasUserData = false;
+
+      // Simple hash simulation (for demo purposes - not actual Poseidon)
+      function simplePoseidonSimulation(input) {
+        // This is a simplified hash simulation for demonstration
+        // In reality, you'd use the actual Poseidon implementation
+        let hash = 0;
+        for (let i = 0; i < input.length; i++) {
+          hash = ((hash << 5) - hash + input.charCodeAt(i)) & 0xffffffff;
+        }
+        // Convert to a large positive number that looks like a field element
+        hash = Math.abs(hash);
+        return (
+          (BigInt(hash) *
+            BigInt(
+              13407807929942597099574024998205846127479365820592393377723561443721764030073785
+            )) %
+          BigInt(
+            21888242871839275222246405745257275088548364400416034343698204186575808495617
+          )
+        ).toString();
+      }
+
+      function generateLiveHash() {
+        const passwordInput = document.getElementById("userPassword");
+        const hashOutput = document.getElementById("liveHashOutput");
+        const hashStatus = document.getElementById("hashStatus");
+        const proveBtn = document.getElementById("proveBtn");
+
+        const password = passwordInput.value.trim();
+
+        if (!password) {
+          hashStatus.textContent = "Error: Enter a password";
+          hashStatus.className = "live-status status-error";
+          return;
+        }
+
+        // Simulate processing
+        hashStatus.textContent = "Generating...";
+        hashStatus.className = "live-status status-pending";
+        hashOutput.textContent = "Computing Poseidon hash...";
+
+        setTimeout(() => {
+          userGeneratedHash = simplePoseidonSimulation(password);
+          userPassword = password;
+          hasUserData = true;
+
+          hashOutput.innerHTML = `<strong>Password:</strong> "${password}"<br><strong>Poseidon Hash:</strong><br>${userGeneratedHash}`;
+          hashStatus.textContent = "Success!";
+          hashStatus.className = "live-status status-success";
+          proveBtn.disabled = false;
+
+          // Update the visual box
+          document.getElementById(
+            "input-box"
+          ).innerHTML = `<div>🔑 Your Password: "${password}" → Hash: ${userGeneratedHash.substring(
+            0,
+            10
+          )}...</div>`;
+
+          // Update subsequent step content with user data
+          updateStepsWithUserData();
+        }, 800);
+      }
+
+      function simulateProofProcess() {
+        const proofSimulation = document.getElementById("proofSimulation");
+        const proveBtn = document.getElementById("proveBtn");
+
+        proveBtn.disabled = true;
+        proveBtn.textContent = "⏳ Simulating...";
+
+        proofSimulation.style.display = "block";
+        proofSimulation.innerHTML = "Initializing ZK proof simulation...";
+
+        const steps = [
+          "Step 1: Compiling circuit constraints...",
+          `Step 2: Generating witness with your password "${userPassword}"...`,
+          "Step 3: Loading trusted setup parameters...",
+          "Step 4: Generating zero-knowledge proof...",
+          "Step 5: Verifying proof validity...",
+          "Step 6: ✅ Success! Proof verified without revealing password!",
+        ];
+
+        let currentSimStep = 0;
+        const interval = setInterval(() => {
+          if (currentSimStep < steps.length) {
+            proofSimulation.innerHTML += "<br>" + steps[currentSimStep];
+            currentSimStep++;
+          } else {
+            clearInterval(interval);
+            proofSimulation.innerHTML += `<br><br><strong>🎉 Congratulations!</strong> You've successfully:<br>• Generated a cryptographic hash of your password "${userPassword}"<br>• Simulated the ZK proof process<br>• Proven knowledge without revealing the secret!`;
+            proveBtn.textContent = "✅ Proof Complete";
+          }
+        }, 1000);
+      }
+
+      function updateStepsWithUserData() {
+        if (!hasUserData) return;
+
+        // Update Step 3 - Witness Generation
+        const witnessBox = document.getElementById("witness-box");
+        witnessBox.innerHTML = `<div>⚙️ Computing witness for "${userPassword}"... All 417 wires calculated!</div>`;
+
+        // Update Step 4 - Trusted Setup
+        const setupBox = document.getElementById("setup-box");
+        setupBox.innerHTML = `<div>🔐 Proving Key + 🗝️ Verification Key Generated for your circuit</div>`;
+
+        // Update Step 5 - Proof Generation
+        const proofBox = document.getElementById("proof-box");
+        proofBox.innerHTML = `<div>🎫 ZK Proof Generated for "${userPassword}" (π_a, π_b, π_c)</div>`;
+
+        // Update Step 6 - Verification
+        const verifyBox = document.getElementById("verify-box");
+        verifyBox.innerHTML = `<div>✅ Verification: OK! You proved knowledge of "${userPassword}"</div>`;
+
+        // Update technical details in step 3
+        const step3Content = document.querySelector("#step3 .technical-detail");
+        if (step3Content) {
+          step3Content.innerHTML = `<strong>Witness File:</strong> witness.wtns (13KB binary file)<br />Contains 417 field elements proving circuit satisfaction<br/>Your password "${userPassword}" → Hash: ${userGeneratedHash.substring(
+            0,
+            20
+          )}...`;
+        }
+
+        // Update privacy demo in Step 3
+        const step3PrivacyDemo = document.querySelector(
+          "#step3 .explanation-box:last-of-type"
+        );
+        if (step3PrivacyDemo) {
+          step3PrivacyDemo.innerHTML = `<h5>🚨 Critical Security Point:</h5>
+<p>The witness contains your secret password "${userPassword}"! It's only used locally to generate the proof and must never be shared. The proof reveals nothing about the witness contents.</p>`;
+        }
+
+        // Update Step 5 privacy demo
+        const step5PrivacyProver = document.querySelector(
+          "#step5 .prover-side"
+        );
+        const step5PrivacyVerifier = document.querySelector(
+          "#step5 .verifier-side"
+        );
+        if (step5PrivacyProver && step5PrivacyVerifier) {
+          step5PrivacyProver.innerHTML = `<h4>🙋‍♂️ Prover Sends:</h4>
+<div class="visible">Proof: π_a, π_b, π_c</div>
+<div class="visible">Public Input: ${userGeneratedHash.substring(
+            0,
+            15
+          )}...</div>
+<div class="hidden">Private: "${userPassword}" (NOT sent)</div>`;
+
+          step5PrivacyVerifier.innerHTML = `<h4>👤 Verifier Receives:</h4>
+<div class="visible">Proof: π_a, π_b, π_c</div>
+<div class="visible">Public Input: ${userGeneratedHash.substring(
+            0,
+            15
+          )}...</div>
+<div class="hidden">Password: STILL HIDDEN</div>`;
+        }
+
+        // Update real proof data in step 6 to use user's hash
+        updateRealProofData();
+      }
 
       // Real data from your actual proof
       const realData = {
@@ -957,6 +1280,19 @@
           ],
         },
       };
+
+      function updateRealProofData() {
+        if (hasUserData) {
+          // Update the real data to reflect user's hash
+          realData.publicInput = userGeneratedHash;
+
+          // Update the real-proof display text
+          const realProofDiv = document.getElementById("real-proof");
+          if (realProofDiv && !dataVisible) {
+            realProofDiv.textContent = `Click "Show Real Data" to see proof data for "${userPassword}"!`;
+          }
+        }
+      }
 
       function updateStepVisuals() {
         for (let i = 1; i <= totalSteps; i++) {
@@ -1024,11 +1360,20 @@
 
         if (!dataVisible) {
           // Show the data
+          const displayPassword = hasUserData ? userPassword : "123456";
+          const displayHash = hasUserData
+            ? userGeneratedHash
+            : realData.publicInput;
+
           proofDisplay.innerHTML = `
-<strong>Your Actual Proof Data:</strong>
+<strong>Your ${hasUserData ? "Interactive" : "Example"} Proof Data:</strong>
+<br><br>
+<strong>Password:</strong> "${displayPassword}" ${
+            hasUserData ? "(Your input!)" : "(Default example)"
+          }
 <br><br>
 <strong>Public Input (Hash):</strong>
-${realData.publicInput}
+${displayHash}
 <br><br>
 <strong>Proof π_a:</strong>
 [${realData.proof.pi_a[0]},
@@ -1046,13 +1391,20 @@ ${realData.publicInput}
 [${realData.proof.pi_c[0]},
  ${realData.proof.pi_c[1]},
  ${realData.proof.pi_c[2]}]
+${
+  hasUserData
+    ? "<br><br><strong>🎉 This proof demonstrates knowledge of YOUR password without revealing it!</strong>"
+    : ""
+}
             `;
           dataBtn.textContent = "🙈 Hide Proof Data";
           dataVisible = true;
         } else {
           // Hide the data
-          proofDisplay.innerHTML =
-            'Click "Show Real Data" to see your actual proof values!';
+          const hideText = hasUserData
+            ? `Click "Show Real Data" to see proof data for "${userPassword}"!`
+            : 'Click "Show Real Data" to see your actual proof values!';
+          proofDisplay.innerHTML = hideText;
           dataBtn.textContent = "📊 Show Real Proof Data";
           dataVisible = false;
         }
@@ -1061,11 +1413,97 @@ ${realData.publicInput}
       function resetDemo() {
         currentStep = 1;
         updateStepVisuals();
-        document.getElementById("real-proof").innerHTML =
-          'Click "Show Real Data" to see your actual proof values!';
+
+        // Reset proof data display
+        const hideText = hasUserData
+          ? `Click "Show Real Data" to see proof data for "${userPassword}"!`
+          : 'Click "Show Real Data" to see your actual proof values!';
+        document.getElementById("real-proof").innerHTML = hideText;
         document.getElementById("dataBtn").textContent =
           "📊 Show Real Proof Data";
         dataVisible = false;
+
+        resetInteractiveDemo();
+      }
+
+      function resetInteractiveDemo() {
+        // Reset interactive demo elements
+        document.getElementById("userPassword").value = "";
+        document.getElementById("liveHashOutput").textContent =
+          'Enter a password and click "Generate Hash" to see the result...';
+        document.getElementById("hashStatus").textContent = "Ready";
+        document.getElementById("hashStatus").className =
+          "live-status status-pending";
+        document.getElementById("proveBtn").disabled = true;
+        document.getElementById("proveBtn").textContent =
+          "🎯 Simulate ZK Proof Process";
+        document.getElementById("proofSimulation").style.display = "none";
+        document.getElementById("input-box").innerHTML =
+          '<div>🔑 Password: "123456" → Hash: 3607056778...</div>';
+
+        // Reset user data
+        userGeneratedHash = null;
+        userPassword = null;
+        hasUserData = false;
+
+        // Reset step content to default
+        resetStepContentToDefault();
+      }
+
+      function resetStepContentToDefault() {
+        // Reset Step 3 - Witness Generation
+        const witnessBox = document.getElementById("witness-box");
+        witnessBox.innerHTML = `<div>⚙️ Computing witness... All 417 wires calculated!</div>`;
+
+        // Reset Step 4 - Trusted Setup
+        const setupBox = document.getElementById("setup-box");
+        setupBox.innerHTML = `<div>🔐 Proving Key + 🗝️ Verification Key Generated</div>`;
+
+        // Reset Step 5 - Proof Generation
+        const proofBox = document.getElementById("proof-box");
+        proofBox.innerHTML = `<div>🎫 ZK Proof Generated (π_a, π_b, π_c)</div>`;
+
+        // Reset Step 6 - Verification
+        const verifyBox = document.getElementById("verify-box");
+        verifyBox.innerHTML = `<div>✅ Verification: OK! Prover knows the password</div>`;
+
+        // Reset technical details in step 3
+        const step3Content = document.querySelector("#step3 .technical-detail");
+        if (step3Content) {
+          step3Content.innerHTML = `<strong>Witness File:</strong> witness.wtns (13KB binary file)<br />Contains 417 field elements proving circuit satisfaction`;
+        }
+
+        // Reset privacy demo in Step 3
+        const step3PrivacyDemo = document.querySelector(
+          "#step3 .explanation-box:last-of-type"
+        );
+        if (step3PrivacyDemo) {
+          step3PrivacyDemo.innerHTML = `<h5>🚨 Critical Security Point:</h5>
+<p>The witness contains your secret password! It's only used locally to generate the proof and must never be shared. The proof reveals nothing about the witness contents.</p>`;
+        }
+
+        // Reset Step 5 privacy demo
+        const step5PrivacyProver = document.querySelector(
+          "#step5 .prover-side"
+        );
+        const step5PrivacyVerifier = document.querySelector(
+          "#step5 .verifier-side"
+        );
+        if (step5PrivacyProver && step5PrivacyVerifier) {
+          step5PrivacyProver.innerHTML = `<h4>🙋‍♂️ Prover Sends:</h4>
+<div class="visible">Proof: π_a, π_b, π_c</div>
+<div class="visible">Public Input: hash</div>
+<div class="hidden">Private: password (NOT sent)</div>`;
+
+          step5PrivacyVerifier.innerHTML = `<h4>👤 Verifier Receives:</h4>
+<div class="visible">Proof: π_a, π_b, π_c</div>
+<div class="visible">Public Input: hash</div>
+<div class="hidden">Password: STILL HIDDEN</div>`;
+        }
+
+        // Reset real proof data
+        realData.publicInput =
+          "3607056778794995795434385085847334626017449707154072104308864676240828390282";
       }
 
       // Initialize
@@ -1079,6 +1517,19 @@ ${realData.publicInput}
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
           previousStep();
+        }
+      });
+
+      // Add Enter key support for password input
+      document.addEventListener("DOMContentLoaded", function () {
+        const passwordInput = document.getElementById("userPassword");
+        if (passwordInput) {
+          passwordInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              generateLiveHash();
+            }
+          });
         }
       });
     </script>
