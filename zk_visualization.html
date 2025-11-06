@@ -239,6 +239,47 @@
         margin: 20px 0;
       }
 
+      .explanation-box {
+        background: #f8f9fa;
+        border-left: 4px solid #17a2b8;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 5px;
+      }
+
+      .explanation-box h5 {
+        color: #17a2b8;
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+      }
+
+      .explanation-box p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .key-concept {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+
+      .key-concept strong {
+        color: #856404;
+      }
+
+      .technical-detail {
+        background: #e2e3e5;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 0.85rem;
+        font-family: "Courier New", monospace;
+      }
+
       /* Responsive design for smaller screens */
       @media (max-width: 1440px) {
         .container {
@@ -274,6 +315,22 @@
           Understanding how your password ZK circuit proves knowledge without
           revealing secrets
         </p>
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+          "
+        >
+          <strong>📚 What You'll Learn:</strong><br />
+          • How zero-knowledge proofs work step-by-step<br />
+          • Why ZK proofs are "magical" - proving knowledge without revealing
+          secrets<br />
+          • The technical process from circuit design to verification<br />
+          • Real-world applications of this privacy-preserving technology
+        </div>
       </div>
 
       <div class="step-container">
@@ -284,16 +341,64 @@
           </div>
           <div class="step-content">
             <p>
-              Your <code>password.circom</code> circuit defines the
-              computational constraints.
+              Your <code>password.circom</code> circuit defines the mathematical
+              relationship that must be proven.
             </p>
             <div class="visual-box" id="circuit-box">
               <div>📝 Circuit: password → Poseidon(password) === hash</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Defines the Problem:</strong> We want to prove
+                knowledge of a password without revealing it
+              </p>
+              <p>
+                • <strong>Creates Constraints:</strong> The circuit enforces
+                that Poseidon(password) must equal the expected hash
+              </p>
+              <p>
+                • <strong>Compiles to R1CS:</strong> Transforms high-level
+                circuit into mathematical constraints
+              </p>
+            </div>
+
+            <div class="key-concept">
+              <strong>Key Concept:</strong> The circuit is like a mathematical
+              "contract" - it defines exactly what needs to be proven true,
+              without revealing the secret inputs.
+            </div>
+
             <div class="data-display">
-              template PasswordProof() { signal input password; // Private
-              signal input hash; // Public component hasher = Poseidon(1);
-              hasher.inputs[0] <== password; hasher.out === hash; }
+              template PasswordProof() { signal input password; // Private: Only
+              prover knows signal input hash; // Public: Everyone knows
+              component hasher = Poseidon(1); hasher.inputs[0] <== password;
+              hasher.out === hash; // This MUST be true }
+            </div>
+
+            <div class="explanation-box">
+              <h5>🔧 Why Poseidon Hash?</h5>
+              <p>
+                • <strong>ZK-Friendly:</strong> Designed specifically for
+                zero-knowledge circuits
+              </p>
+              <p>
+                • <strong>Efficient:</strong> Requires fewer constraints than
+                SHA-256 (216 vs ~27,000)
+              </p>
+              <p>
+                • <strong>Secure:</strong> Cryptographically secure hash
+                function
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Circuit Statistics:</strong><br />
+              • 71 template instances<br />
+              • 216 non-linear constraints<br />
+              • 199 linear constraints<br />
+              • 417 total wires (signals)
             </div>
           </div>
         </div>
@@ -304,10 +409,30 @@
             <div class="step-title">Input Preparation</div>
           </div>
           <div class="step-content">
-            <p>Prepare the secret password and calculate its Poseidon hash.</p>
+            <p>
+              Create the inputs needed for proof generation - both secret and
+              public values.
+            </p>
             <div class="visual-box" id="input-box">
               <div>🔑 Password: "123456" → Hash: 3607056778...</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Secret Input:</strong> The password you want to prove
+                knowledge of
+              </p>
+              <p>
+                • <strong>Public Input:</strong> The hash that everyone can see
+                and verify against
+              </p>
+              <p>
+                • <strong>Hash Calculation:</strong> Use Poseidon to compute
+                hash(password)
+              </p>
+            </div>
+
             <div class="privacy-demo">
               <div class="prover-side">
                 <h4>🙋‍♂️ Prover Knows:</h4>
@@ -320,6 +445,36 @@
                 <div class="visible">Hash: 3607056778...</div>
               </div>
             </div>
+
+            <div class="key-concept">
+              <strong>Privacy Model:</strong> The prover knows both the password
+              and its hash, but will only reveal the hash. The password remains
+              completely secret throughout the entire process.
+            </div>
+
+            <div class="explanation-box">
+              <h5>🔒 Why This Works:</h5>
+              <p>
+                • <strong>One-Way Function:</strong> Hash functions are easy to
+                compute forward but nearly impossible to reverse
+              </p>
+              <p>
+                • <strong>Deterministic:</strong> Same password always produces
+                the same hash
+              </p>
+              <p>
+                • <strong>Collision Resistant:</strong> Extremely difficult to
+                find two inputs with the same hash
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Input File (input.json):</strong><br />
+              {<br />
+              &nbsp;&nbsp;"password": "123456",<br />
+              &nbsp;&nbsp;"hash": "3607056778794995795..."<br />
+              }
+            </div>
           </div>
         </div>
 
@@ -330,17 +485,70 @@
           </div>
           <div class="step-content">
             <p>
-              Compute all intermediate values that satisfy the circuit
-              constraints.
+              Execute the circuit with your inputs to compute all intermediate
+              values and verify constraints.
             </p>
             <div class="visual-box" id="witness-box">
               <div>⚙️ Computing witness... All 417 wires calculated!</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Circuit Execution:</strong> Run the circuit with your
+                secret password as input
+              </p>
+              <p>
+                • <strong>Constraint Checking:</strong> Verify that
+                Poseidon(password) === expected_hash
+              </p>
+              <p>
+                • <strong>Witness Generation:</strong> Record all intermediate
+                values (signals) in the computation
+              </p>
+            </div>
+
             <div class="arrow">⬇️</div>
-            <p>
-              <strong>Witness contains:</strong> All internal signal values
-              needed to prove the circuit is satisfied
-            </p>
+
+            <div class="key-concept">
+              <strong>The Witness:</strong> Contains the values of ALL 417 wires
+              in your circuit - every intermediate calculation needed to prove
+              the circuit is satisfied.
+            </div>
+
+            <div class="explanation-box">
+              <h5>🔍 What's in a Witness:</h5>
+              <p>
+                • <strong>Input Signals:</strong> Your password and the target
+                hash
+              </p>
+              <p>
+                • <strong>Hash Computation:</strong> All intermediate values in
+                the Poseidon hash calculation
+              </p>
+              <p>
+                • <strong>Internal Wires:</strong> Every signal value that flows
+                through the circuit
+              </p>
+              <p>
+                • <strong>Output Verification:</strong> Confirmation that the
+                constraint is satisfied
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Witness File:</strong> witness.wtns (13KB binary file)<br />
+              Contains 417 field elements proving circuit satisfaction
+            </div>
+
+            <div class="explanation-box">
+              <h5>🚨 Critical Security Point:</h5>
+              <p>
+                The witness contains your secret password! It's only used
+                locally to generate the proof and must never be shared. The
+                proof reveals nothing about the witness contents.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -351,15 +559,72 @@
           </div>
           <div class="step-content">
             <p>
-              Generate proving and verification keys using the Powers of Tau
-              ceremony.
+              Create the cryptographic keys needed for proof generation and
+              verification using a trusted setup ceremony.
             </p>
             <div class="visual-box" id="setup-box">
               <div>🔐 Proving Key + 🗝️ Verification Key Generated</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Trusted Setup:</strong> Generate circuit-specific
+                cryptographic parameters
+              </p>
+              <p>
+                • <strong>Proving Key:</strong> Used by provers to create
+                zero-knowledge proofs
+              </p>
+              <p>
+                • <strong>Verification Key:</strong> Used by verifiers to check
+                proof validity
+              </p>
+            </div>
+
+            <div class="key-concept">
+              <strong>Powers of Tau:</strong> A ceremony where multiple parties
+              contribute randomness to create trustworthy cryptographic
+              parameters. No single party can compromise the system.
+            </div>
+
+            <div class="explanation-box">
+              <h5>🔄 Two-Phase Process:</h5>
+              <p>
+                • <strong>Phase 1:</strong> Universal setup (Powers of Tau) -
+                can be reused for multiple circuits
+              </p>
+              <p>
+                • <strong>Phase 2:</strong> Circuit-specific setup - creates
+                keys for your specific circuit
+              </p>
+            </div>
+
             <div class="data-display">
               Circuit Hash: aa33e85e f416a462... Contribution Hash: f98774b1
               690dc895...
+            </div>
+
+            <div class="explanation-box">
+              <h5>🛡️ Security Guarantees:</h5>
+              <p>
+                • <strong>Soundness:</strong> Impossible to create fake proofs
+                (unless setup compromised)
+              </p>
+              <p>
+                • <strong>Zero-Knowledge:</strong> Proofs reveal nothing about
+                secret inputs
+              </p>
+              <p>
+                • <strong>Trust Assumption:</strong> At least one participant in
+                ceremony must be honest
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Generated Files:</strong><br />
+              • password_final.zkey (182KB) - Proving key<br />
+              • verification_key.json (2.9KB) - Verification key
             </div>
           </div>
         </div>
@@ -371,11 +636,29 @@
           </div>
           <div class="step-content">
             <p>
-              Create a cryptographic proof using the witness and proving key.
+              Transform your witness into a zero-knowledge proof using advanced
+              cryptographic techniques.
             </p>
             <div class="visual-box" id="proof-box">
               <div>🎫 ZK Proof Generated (π_a, π_b, π_c)</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Proof Generation:</strong> Use Groth16 algorithm to
+                create a succinct proof
+              </p>
+              <p>
+                • <strong>Zero-Knowledge:</strong> Proof reveals nothing about
+                your password
+              </p>
+              <p>
+                • <strong>Succinctness:</strong> Proof is tiny (~800 bytes)
+                regardless of computation complexity
+              </p>
+            </div>
+
             <div class="privacy-demo">
               <div class="prover-side">
                 <h4>🙋‍♂️ Prover Sends:</h4>
@@ -390,6 +673,45 @@
                 <div class="hidden">Password: STILL HIDDEN</div>
               </div>
             </div>
+
+            <div class="key-concept">
+              <strong>The Magic:</strong> The proof mathematically convinces
+              anyone that you know the password, without revealing any
+              information about what the password actually is!
+            </div>
+
+            <div class="explanation-box">
+              <h5>🧮 Groth16 Proof Components:</h5>
+              <p>
+                • <strong>π_a:</strong> First elliptic curve point (proves
+                knowledge)
+              </p>
+              <p>
+                • <strong>π_b:</strong> Second elliptic curve point (ensures
+                soundness)
+              </p>
+              <p>
+                • <strong>π_c:</strong> Third elliptic curve point (provides
+                zero-knowledge)
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Proof Structure:</strong><br />
+              • Each π component contains 2-3 large numbers<br />
+              • Total size: ~800 bytes<br />
+              • Verification time: ~2-5 milliseconds
+            </div>
+
+            <div class="explanation-box">
+              <h5>🔒 Security Properties:</h5>
+              <p>• <strong>Completeness:</strong> Valid proofs always verify</p>
+              <p>• <strong>Soundness:</strong> Invalid proofs never verify</p>
+              <p>
+                • <strong>Zero-Knowledge:</strong> Proof reveals nothing beyond
+                validity
+              </p>
+            </div>
           </div>
         </div>
 
@@ -399,10 +721,93 @@
             <div class="step-title">Proof Verification</div>
           </div>
           <div class="step-content">
-            <p>Verify the proof without learning the secret password.</p>
+            <p>
+              Mathematically verify the proof's validity without learning any
+              secrets.
+            </p>
             <div class="visual-box" id="verify-box">
               <div>✅ Verification: OK! Prover knows the password</div>
             </div>
+
+            <div class="explanation-box">
+              <h5>🎯 What This Step Does:</h5>
+              <p>
+                • <strong>Verification Algorithm:</strong> Uses elliptic curve
+                pairing operations
+              </p>
+              <p>
+                • <strong>Public Inputs Only:</strong> Only uses the hash and
+                verification key
+              </p>
+              <p>
+                • <strong>Mathematical Certainty:</strong> Cryptographically
+                guaranteed correctness
+              </p>
+            </div>
+
+            <div class="key-concept">
+              <strong>Verification Equation:</strong> The verifier performs a
+              mathematical check using elliptic curve pairings. If the equation
+              holds, the proof is valid with overwhelming probability.
+            </div>
+
+            <div class="explanation-box">
+              <h5>🧮 Verification Process:</h5>
+              <p>
+                • <strong>Parse Proof:</strong> Extract π_a, π_b, π_c from
+                proof.json
+              </p>
+              <p>
+                • <strong>Check Public Inputs:</strong> Ensure hash matches
+                expected value
+              </p>
+              <p>
+                • <strong>Pairing Check:</strong> Verify e(π_a, π_b) = e(α, β) ·
+                e(L, γ) · e(C, δ)
+              </p>
+              <p>
+                • <strong>Accept/Reject:</strong> Mathematical certainty of
+                result
+              </p>
+            </div>
+
+            <div class="explanation-box">
+              <h5>🚀 Real-World Applications:</h5>
+              <p>
+                • <strong>Authentication:</strong> Prove you know a password
+                without sending it
+              </p>
+              <p>
+                • <strong>Private Voting:</strong> Prove eligibility without
+                revealing identity
+              </p>
+              <p>
+                • <strong>Financial Privacy:</strong> Prove solvency without
+                revealing balances
+              </p>
+              <p>
+                • <strong>Credentials:</strong> Prove qualifications without
+                revealing details
+              </p>
+            </div>
+
+            <div class="technical-detail">
+              <strong>Verification Stats:</strong><br />
+              • Verification time: ~2-5ms<br />
+              • Required data: proof.json (800B) + public.json (83B)<br />
+              • Success rate: 100% for valid proofs, 0% for invalid
+            </div>
+
+            <div class="explanation-box">
+              <h5>🎉 What We've Accomplished:</h5>
+              <p>
+                You've successfully created and verified a zero-knowledge proof
+                that demonstrates knowledge of a password without ever revealing
+                it. This is the fundamental building block for
+                privacy-preserving cryptographic systems!
+              </p>
+            </div>
+
             <div class="data-display" id="real-proof">
               Click "Show Real Data" to see your actual proof values!
             </div>
