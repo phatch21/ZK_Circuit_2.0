@@ -27,41 +27,145 @@ This project demonstrates a zero-knowledge proof system where:
 
 ### Prerequisites
 
-- Node.js and npm installed
-- Circom compiler (build from source or install binary)
+- **Node.js** (v16+ recommended) and npm
+- **Circom compiler** (v2.1.5+)
+  - Option 1: [Download binary](https://github.com/iden3/circom/releases)
+  - Option 2: Build from source (requires Rust):
+    ```bash
+    git clone https://github.com/iden3/circom.git
+    cd circom
+    cargo build --release
+    cargo install --path circom
+    ```
 
-### Setup
+### Setup Instructions
 
-1. Install dependencies:
+1. **Clone and install dependencies:**
 
    ```bash
+   git clone https://github.com/phatch21/ZK_Circuit_2.0.git
+   cd ZK_Circuit_2.0
    npm install
    ```
 
-2. Compile the circuit:
+2. **Verify Circom installation:**
 
    ```bash
-   circom password.circom --r1cs --wasm --sym
+   circom --version
+   # Should show: circom compiler 2.1.5 (or higher)
    ```
 
-3. Generate witness:
+3. **Quick Demo (using pre-generated files):**
+
+   The repository includes pre-generated files so you can immediately test:
 
    ```bash
-   node password_js/generate_witness.js password_js/password.wasm input.json witness.wtns
-   ```
-
-4. Generate proof:
-
-   ```bash
-   npx snarkjs groth16 prove password_final.zkey witness.wtns proof.json public.json
-   ```
-
-5. Verify proof:
-   ```bash
+   # Verify the existing proof
    npx snarkjs groth16 verify verification_key.json public.json proof.json
    ```
 
-## 🎯 Interactive Visualization
+   Expected output: `[INFO]  snarkJS: OK!`
+
+4. **Generate your own proof:**
+
+   ````bash
+   # Method 1: Use the helper script (modify password in calculate_hash.js first)
+   node calculate_hash.js
+
+   # Method 2: Calculate hash for any password
+   node -e "
+   const circomlibjs = require('circomlibjs');
+   (async () => {
+     const poseidon = await circomlibjs.buildPoseidon();
+     const password = BigInt(process.argv[1] || '123456');
+     const hash = poseidon([password]);
+     const input = { password: password.toString(), hash: poseidon.F.toString(hash) };
+     require('fs').writeFileSync('input.json', JSON.stringify(input, null, 2));
+     console.log('Password:', password.toString());
+     console.log('Hash:', poseidon.F.toString(hash));
+   })();
+   " "YOUR_PASSWORD_HERE"
+
+   # Generate witness with your password
+   node password_js/generate_witness.js password_js/password.wasm input.json witness.wtns
+
+   # Generate proof
+   npx snarkjs groth16 prove password_final.zkey witness.wtns proof.json public.json
+
+   # Verify your proof
+   npx snarkjs groth16 verify verification_key.json public.json proof.json
+   ```5. **Full rebuild (optional):**
+
+   If you want to rebuild everything from scratch:
+
+   ```bash
+   # Compile circuit
+   circom password.circom --r1cs --wasm --sym -o .
+
+   # The Powers of Tau ceremony files are included, but if you want to redo:
+   # npx snarkjs powersoftau new bn128 12 pot12_0000.ptau -v
+   # npx snarkjs powersoftau contribute pot12_0000.ptau pot12_0001.ptau --name="First contribution" -v
+   # npx snarkjs powersoftau prepare phase2 pot12_0001.ptau pot12_final.ptau -v
+
+   # Setup proving and verification keys
+   npx snarkjs groth16 setup password.r1cs pot12_final.ptau password_0000.zkey
+   npx snarkjs zkey contribute password_0000.zkey password_final.zkey --name="1st Contributor Name" -v
+   npx snarkjs zkey export verificationkey password_final.zkey verification_key.json
+   ````
+
+### 🎮 **Interactive Visualization**
+
+Simply open `zk_visualization.html` in your browser - no additional setup required!
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Circom not found:**
+
+```bash
+# Add to PATH or use full path
+export PATH=$PATH:/path/to/circom/target/release
+```
+
+**Permission errors (Windows):**
+
+```powershell
+# Run PowerShell as Administrator or use:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Node.js version issues:**
+
+```bash
+# Use Node.js v16 or higher
+node --version
+# If needed, use nvm to install correct version:
+nvm install 16
+nvm use 16
+```
+
+**Memory issues during compilation:**
+
+```bash
+# Increase Node.js memory limit
+export NODE_OPTIONS="--max-old-space-size=4096"
+```
+
+### File Structure After Setup
+
+```
+ZK_Circuit_2.0/
+├── password.circom          # ✅ Circuit definition
+├── password.r1cs           # ✅ Generated constraints
+├── password_js/            # ✅ Generated WASM files
+├── password_final.zkey     # ✅ Proving key
+├── verification_key.json   # ✅ Verification key
+├── input.json              # ✅ Example inputs
+├── proof.json              # ✅ Generated proof
+├── public.json             # ✅ Public inputs
+└── zk_visualization.html   # ✅ Interactive demo
+```
 
 Open `zk_visualization.html` in your browser to see an interactive step-by-step walkthrough of how the zero-knowledge proof system works!
 
