@@ -8,7 +8,7 @@ This project demonstrates a zero-knowledge proof system where:
 
 - You can prove you know a password without revealing it
 - The verifier only sees the hash of the password
-- The proof is cryptographically sound and cannot be faked
+- The proof is cryptographically sound under standard assumptions and resistant to forgery
 
 ## 📁 Project Structure
 
@@ -86,17 +86,18 @@ This project implements the **exact same technology stack** used in production b
 
 ### **Technical Stack Alignment**
 
-| This Project | Production Systems | Industry Usage |
-|-------------|-------------------|----------------|
-| **Circom** | Polygon zkEVM, zkSync Era | Circuit definition language |
-| **Groth16** | Zcash, Tornado Cash | Most widely deployed zk-SNARK |
-| **snarkjs** | Aztec, Hermez | JavaScript proof generation |
-| **Poseidon** | StarkNet, Mina Protocol | ZK-optimized hash function |
-| **BN254 Curve** | Ethereum, Polygon | Standard elliptic curve |
+| This Project    | Production Systems        | Industry Usage                |
+| --------------- | ------------------------- | ----------------------------- |
+| **Circom**      | Polygon zkEVM, zkSync Era | Circuit definition language   |
+| **Groth16**     | Zcash, Tornado Cash       | Most widely deployed zk-SNARK |
+| **snarkjs**     | Aztec, Hermez             | JavaScript proof generation   |
+| **Poseidon**    | StarkNet, Mina Protocol   | ZK-optimized hash function    |
+| **BN254 Curve** | Ethereum, Polygon         | Standard elliptic curve       |
 
 ### **Architectural Parallels**
 
 **Your Circuit Pattern:**
+
 ```circom
 signal input password;    // Private witness
 signal input hash;        // Public commitment
@@ -104,17 +105,20 @@ hasher.out === hash;      // Constraint satisfaction
 ```
 
 **Production Equivalents:**
+
 - **zkSync**: `signal input transaction` → `signal input stateRoot`
-- **Tornado Cash**: `signal input secret` → `signal input commitment`  
+- **Tornado Cash**: `signal input secret` → `signal input commitment`
 - **Polygon ID**: `signal input identity` → `signal input credential`
 
 ### **Real-World Applications**
 
 1. **Layer 2 Scaling** (Polygon zkEVM, Matter Labs zkSync)
+
    - Bundle thousands of transactions into one zk-SNARK proof
    - Uses identical Groth16 + Circom + snarkjs stack
 
 2. **Privacy-Preserving DeFi** (Aztec Protocol, Tornado Cash)
+
    - Prove transaction validity without revealing amounts
    - Same constraint satisfaction model as this password circuit
 
@@ -124,14 +128,14 @@ hasher.out === hash;      // Constraint satisfaction
 
 ### **Production Deployment Ready**
 
-This circuit could be deployed to Ethereum mainnet today:
+This circuit could be deployed to Ethereum mainnet with appropriate gas optimization and verifier deployment:
 
 ```solidity
 // Smart contract verifier (auto-generated from this circuit)
 contract PasswordVerifier {
     function verifyProof(
         uint[2] memory a,
-        uint[2][2] memory b, 
+        uint[2][2] memory b,
         uint[2] memory c,
         uint[] memory input
     ) public view returns (bool) {
@@ -143,34 +147,39 @@ contract PasswordVerifier {
 ### **Market Impact**
 
 Systems using this technology stack:
+
 - **zkSync Era**: $1B+ TVL (Total Value Locked)
-- **Polygon zkEVM**: $50M+ daily transaction volume  
+- **Polygon zkEVM**: $50M+ daily transaction volume
 - **Zcash**: $400M+ market cap privacy coin
 - **Aztec**: $100M+ in private DeFi transactions
 
-**Developer Salaries**: zk-SNARK engineers command $200k-500k annually due to the specialized nature of this technology.
+**Developer Salaries**: Top-tier zk-SNARK engineers in leading blockchain firms may command salaries in the $200k-500k range due to the specialized nature of this technology.
 
 ## 🎯 Technical Achievements Demonstrated
 
 ### **Zero-Knowledge Cryptography**
+
 - ✅ **zk-SNARK Implementation**: Complete Groth16 proof system
-- ✅ **Circuit Design**: Constraint satisfaction with 216 non-linear constraints  
+- ✅ **Circuit Design**: Constraint satisfaction with 216 non-linear constraints
 - ✅ **Trusted Setup**: Powers of Tau ceremony implementation
 - ✅ **Field Mathematics**: BN254 elliptic curve operations
 
 ### **Blockchain-Ready Development**
+
 - ✅ **Production Stack**: Circom + snarkjs (industry standard)
 - ✅ **Cryptographic Primitives**: Poseidon hash, field arithmetic
 - ✅ **Proof Generation**: Groth16 protocol implementation
 - ✅ **Verification Logic**: Smart contract compatible
 
 ### **Full-Stack Engineering**
+
 - ✅ **Interactive Visualization**: Responsive web application
 - ✅ **Educational Design**: Complex concepts made accessible
 - ✅ **Repository Management**: Branch protection, GitHub Pages deployment
 - ✅ **Documentation**: Comprehensive technical documentation
 
 ### **Research & Problem Solving**
+
 - ✅ **Compiler Build**: Circom built from Rust source code
 - ✅ **Environment Setup**: Complex cryptographic toolchain
 - ✅ **Performance Optimization**: ZK-friendly hash function selection
