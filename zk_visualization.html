@@ -280,6 +280,19 @@
         font-family: "Courier New", monospace;
       }
 
+      .step-specific-btn {
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        transform: translateY(10px);
+      }
+
+      .step.active .step-specific-btn {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
       /* Responsive design for smaller screens */
       @media (max-width: 1440px) {
         .container {
@@ -325,23 +338,23 @@
         }
 
         .floating-controls .btn:not(.nav-buttons .btn) {
-          width: 48%;
+          width: 80%;
+          max-width: 200px;
           font-size: 0.85rem;
-          margin: 2px 1%;
-          display: inline-block;
-        }
-
-        .floating-controls {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+          margin: 2px auto;
+          display: block;
         }
 
         .footer-row {
           display: flex;
           justify-content: center;
           width: 100%;
-          max-width: 400px;
+        }
+
+        .floating-controls {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
       }
 
@@ -874,6 +887,20 @@
             <div class="data-display" id="real-proof">
               Click "Show Real Data" to see your actual proof values!
             </div>
+
+            <div
+              style="text-align: center; margin-top: 20px"
+              class="step-specific-btn"
+            >
+              <button
+                class="btn"
+                onclick="showRealData()"
+                id="dataBtn"
+                style="display: inline-block; width: auto; margin: 0 auto"
+              >
+                📊 Show Real Proof Data
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -891,10 +918,6 @@
       </div>
 
       <div class="footer-row">
-        <button class="btn" onclick="showRealData()" id="dataBtn">
-          Show Real Data
-        </button>
-
         <button class="btn" onclick="resetDemo()" id="resetBtn">
           🔄 Reset Demo
         </button>
@@ -1024,13 +1047,13 @@ ${realData.publicInput}
  ${realData.proof.pi_c[1]},
  ${realData.proof.pi_c[2]}]
             `;
-          dataBtn.textContent = "Hide Real Data";
+          dataBtn.textContent = "🙈 Hide Proof Data";
           dataVisible = true;
         } else {
           // Hide the data
           proofDisplay.innerHTML =
             'Click "Show Real Data" to see your actual proof values!';
-          dataBtn.textContent = "Show Real Data";
+          dataBtn.textContent = "📊 Show Real Proof Data";
           dataVisible = false;
         }
       }
@@ -1040,7 +1063,8 @@ ${realData.publicInput}
         updateStepVisuals();
         document.getElementById("real-proof").innerHTML =
           'Click "Show Real Data" to see your actual proof values!';
-        document.getElementById("dataBtn").textContent = "Show Real Data";
+        document.getElementById("dataBtn").textContent =
+          "📊 Show Real Proof Data";
         dataVisible = false;
       }
 
