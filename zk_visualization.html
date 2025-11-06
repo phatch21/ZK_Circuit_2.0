@@ -1112,6 +1112,45 @@
         ).toString();
       }
 
+      // Generate realistic proof values based on user input
+      function generateProofFromHash(hash) {
+        // Use the hash as a seed to generate deterministic but realistic-looking proof values
+        // This creates proof values that change with different inputs but look authentic
+        const hashNum = BigInt(hash);
+        const fieldModulus = BigInt(
+          "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        );
+
+        // Generate π_a (two field elements plus "1")
+        const pi_a = [
+          ((hashNum * BigInt(7919)) % fieldModulus).toString(),
+          ((hashNum * BigInt(6521)) % fieldModulus).toString(),
+          "1",
+        ];
+
+        // Generate π_b (two pairs of field elements plus ["1", "0"])
+        const pi_b = [
+          [
+            ((hashNum * BigInt(4801)) % fieldModulus).toString(),
+            ((hashNum * BigInt(3571)) % fieldModulus).toString(),
+          ],
+          [
+            ((hashNum * BigInt(2341)) % fieldModulus).toString(),
+            ((hashNum * BigInt(1987)) % fieldModulus).toString(),
+          ],
+          ["1", "0"],
+        ];
+
+        // Generate π_c (two field elements plus "1")
+        const pi_c = [
+          ((hashNum * BigInt(9973)) % fieldModulus).toString(),
+          ((hashNum * BigInt(8009)) % fieldModulus).toString(),
+          "1",
+        ];
+
+        return { pi_a, pi_b, pi_c };
+      }
+
       function generateLiveHash() {
         const passwordInput = document.getElementById("userPassword");
         const hashOutput = document.getElementById("liveHashOutput");
@@ -1168,7 +1207,7 @@
           "Step 1: Compiling circuit constraints...",
           `Step 2: Generating witness with your password "${userPassword}"...`,
           "Step 3: Loading trusted setup parameters...",
-          "Step 4: Generating zero-knowledge proof...",
+          `Step 4: Generating zero-knowledge proof for "${userPassword}"...`,
           "Step 5: Verifying proof validity...",
           "Step 6: ✅ Success! Proof verified without revealing password!",
         ];
@@ -1286,6 +1325,10 @@
           // Update the real data to reflect user's hash
           realData.publicInput = userGeneratedHash;
 
+          // Generate new proof values based on the user's hash
+          const newProof = generateProofFromHash(userGeneratedHash);
+          realData.proof = newProof;
+
           // Update the real-proof display text
           const realProofDiv = document.getElementById("real-proof");
           if (realProofDiv && !dataVisible) {
@@ -1375,6 +1418,11 @@
 <strong>Public Input (Hash):</strong>
 ${displayHash}
 <br><br>
+${
+  hasUserData
+    ? "<strong>🔄 Generated Proof Values (based on your hash):</strong><br><br>"
+    : "<strong>Example Proof Values:</strong><br><br>"
+}
 <strong>Proof π_a:</strong>
 [${realData.proof.pi_a[0]},
  ${realData.proof.pi_a[1]},
@@ -1393,11 +1441,11 @@ ${displayHash}
  ${realData.proof.pi_c[2]}]
 ${
   hasUserData
-    ? "<br><br><strong>🎉 This proof demonstrates knowledge of YOUR password without revealing it!</strong>"
+    ? "<br><br><strong>🎉 This proof demonstrates knowledge of YOUR password without revealing it!</strong><br><small>Note: These proof values are deterministically generated from your hash for demonstration. In a real ZK system, they would be computed using the actual Groth16 algorithm.</small>"
     : ""
 }
             `;
-          dataBtn.textContent = "🙈 Hide Proof Data";
+          dataBtn.textContent = "Hide Proof Data";
           dataVisible = true;
         } else {
           // Hide the data
@@ -1504,6 +1552,31 @@ ${
         // Reset real proof data
         realData.publicInput =
           "3607056778794995795434385085847334626017449707154072104308864676240828390282";
+
+        // Reset proof values to original example
+        realData.proof = {
+          pi_a: [
+            "12246699224146548627624829209600247945750932139831111645328730466600448020655",
+            "7092076363605337771732379755396515266262121109253632505918013175086193007416",
+            "1",
+          ],
+          pi_b: [
+            [
+              "12688793338312962033041396111903075687159456896404431660203437358697869656086",
+              "3736381997616963958526035063790946218087651755117739473637210399883566022986",
+            ],
+            [
+              "13017499828776106857417975762902544155806477130587681284411023337035741513386",
+              "2567661726386688530449431032730908097668871569859777304991905147827476996387",
+            ],
+            ["1", "0"],
+          ],
+          pi_c: [
+            "979833473831804295709808911181475642130290987577771095588948640681540378288",
+            "729158646760088476307727799993169940563438518246923784880367707695952597064",
+            "1",
+          ],
+        };
       }
 
       // Initialize
