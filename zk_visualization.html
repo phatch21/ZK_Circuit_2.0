@@ -285,24 +285,87 @@
         .container {
           margin-right: 20px;
         }
+      }
+
+      /* Medium screens: Navigation becomes locked footer */
+      @media (max-width: 960px) {
+        .container {
+          margin: 0 auto;
+          padding-bottom: 120px; /* Make room for footer */
+        }
 
         .floating-controls {
-          position: relative;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
           top: auto;
-          right: auto;
           transform: none;
           width: 100%;
-          margin-top: 20px;
+          margin: 0;
+          border-radius: 0;
+          border-top: 2px solid #dee2e6;
+          box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+          z-index: 1001;
+          padding: 15px 20px;
+        }
+
+        .floating-controls h3 {
+          display: none; /* Hide title in footer mode */
+        }
+
+        .nav-buttons {
+          justify-content: center;
+          margin-bottom: 10px;
+        }
+
+        .nav-buttons .btn {
+          width: 120px;
+          font-size: 0.85rem;
+        }
+
+        .floating-controls .btn:not(.nav-buttons .btn) {
+          width: 48%;
+          font-size: 0.85rem;
+          margin: 2px 1%;
+          display: inline-block;
+        }
+
+        .floating-controls {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .footer-row {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          max-width: 400px;
         }
       }
 
       @media (max-width: 768px) {
         .container {
           margin: 0 10px;
+          padding-bottom: 140px; /* More room for footer on mobile */
         }
 
         body {
           padding: 10px;
+        }
+
+        .floating-controls {
+          padding: 12px 15px;
+        }
+
+        .nav-buttons .btn {
+          width: 100px;
+          font-size: 0.8rem;
+        }
+
+        .floating-controls .btn:not(.nav-buttons .btn) {
+          font-size: 0.8rem;
         }
       }
     </style>
@@ -827,13 +890,15 @@
         <button class="btn" onclick="nextStep()" id="nextBtn">Next →</button>
       </div>
 
-      <button class="btn" onclick="showRealData()" id="dataBtn">
-        Show Real Data
-      </button>
+      <div class="footer-row">
+        <button class="btn" onclick="showRealData()" id="dataBtn">
+          Show Real Data
+        </button>
 
-      <button class="btn" onclick="resetDemo()" id="resetBtn">
-        🔄 Reset Demo
-      </button>
+        <button class="btn" onclick="resetDemo()" id="resetBtn">
+          🔄 Reset Demo
+        </button>
+      </div>
     </div>
 
     <script>
