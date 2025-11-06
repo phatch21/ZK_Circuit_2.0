@@ -100,6 +100,20 @@ This implementation uses:
 - [snarkjs](https://github.com/iden3/snarkjs) - JavaScript toolkit for zkSNARKs
 - [circomlibjs](https://github.com/iden3/circomlibjs) - JavaScript implementations of circom circuits
 
+## 📄 License
+
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+### Third-Party Licenses
+
+This project uses GPL-3.0 licensed libraries from [iden3](https://github.com/iden3):
+
+- **circomlib** - Circuit library for Circom
+- **snarkjs** - JavaScript toolkit for zkSNARKs
+- **circomlibjs** - JavaScript implementations of circom circuits
+
+The Poseidon hash function implementation is from circomlib and is used under GPL-3.0 license.
+
 ---
 
 _This project demonstrates the power of zero-knowledge proofs for privacy-preserving authentication!_ 🔐✨
